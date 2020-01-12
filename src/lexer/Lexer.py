@@ -16,6 +16,7 @@ class Lexer:
         # operators
         self.lexer.add('REPLACE', 'replace')
         self.lexer.add('WITH', 'with')
+        self.lexer.add('SORT', 'sort(\s+reverse)?')
 
         self.lexer.ignore('\s+')
 

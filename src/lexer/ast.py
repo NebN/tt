@@ -1,32 +1,56 @@
 import re
+from abc import abstractmethod
+from src.model import Text
 
 
 class String:
     def __init__(self, value):
-        self.value = re.match('"(.*)"', value).group(1)
+        self._value = re.match('"(.*)"', value).group(1)
 
-    def eval(self):
-        return self.value
+    def value(self):
+        return self._value
 
 
-class ReplaceWith:
+class Transformation:
+    @abstractmethod
+    def transform(self, text):
+        pass
+
+
+class Replace(Transformation):
     def __init__(self, original, replacement):
-        def replace(string):
-            print(f'replacing {original.eval()} with {replacement.eval()} in {string}')
-            return string.replace(original.eval(), replacement.eval())
+        self.original = original.value()
+        self.replacement = replacement.value()
 
-        self.f = replace
+    def transform(self, text):
+        return Text(text=text.text().replace(self.original, self.replacement))
 
-    def eval(self):
-        return self.f
+    def __repr__(self):
+        return f'Replace {self.original} with {self.replacement}'
+
+class Sort(Transformation):
+    def __init__(self, reverse):
+        self.reverse = reverse
+
+    def transform(self, text):
+        lines = text.lines()
+        lines.sort(reverse=self.reverse)
+        return Text(lines=lines)
+
+    def __repr__(self):
+        return f'Sort reverse={self.reverse}'
 
 
-class Procedure:
-    def __init__(self, a, b):
-        def combine(string):
-            return b.eval()(a.eval()(string))
+class MultiTransformation(Transformation):
+    def __init__(self, *transformations):
+        self.transformations = transformations
 
-        self.f = combine
+    def transform(self, text):
+        transformed = text
+        for t in self.transformations:
+            transformed = t.transform(transformed)
+        return transformed
 
-    def eval(self):
-        return self.f
+    def __repr__(self):
+        return "\n".join([str(t) for t in self.transformations])
+
