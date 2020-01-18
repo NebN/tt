@@ -15,3 +15,6 @@ class Text:
         if not self._lines:
             self._lines = self._text.splitlines()
         return self._lines
+
+    def __repr__(self):
+        return self.text()

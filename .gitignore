@@ -1,4 +1,7 @@
 .idea
 .pyc
+.spec
 /venv
+/dist
+/build
 /__pycache__

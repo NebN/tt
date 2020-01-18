@@ -22,11 +22,13 @@ class Replace(Transformation):
         self.original = original.value()
         self.replacement = replacement.value()
 
-    def transform(self, text):
-        return Text(text=text.text().replace(self.original, self.replacement))
+    def transform(self, inputtext):
+        print(self)
+        return Text(text=re.sub(self.original, self.replacement, inputtext.text()))
 
     def __repr__(self):
         return f'Replace {self.original} with {self.replacement}'
+
 
 class Sort(Transformation):
     def __init__(self, reverse):
