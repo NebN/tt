@@ -1,7 +1,8 @@
-.idea
-.pyc
-.spec
+*.idea
+*.pyc
+*.spec
+*.tt
 /venv
 /dist
 /build
-/__pycache__
+/__pycache__/
