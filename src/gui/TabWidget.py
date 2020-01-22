@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QTabWidget, QToolButton, QMenu, QWidget, QFileDialog
 from src.controller import Controller, UserAction
 from .WorkSheet import WorkSheet
 from .Dialog import Dialog
+from .BinaryDialog import BinaryDialog
 
 
 class TabWidget(QTabWidget):
@@ -43,11 +44,27 @@ class TabWidget(QTabWidget):
 
     def add(self, tab, name):
         index = self._len() - 1
+        tab.name.connect(self._handle_name_change)
         self.insertTab(index, tab, name)
         self.setCurrentIndex(index)
 
-    # TODO handle file save on close or persistence between sessions
+    def _handle_name_change(self, name):
+        # TODO can this be wrong? cab the tab change in the meanwhile?
+        self.setTabText(self.currentIndex(), name)
+
     def _handle_close_requested(self, index):
+        tab = self.widget(index)
+        if tab.isdirty:
+            self.dialog = BinaryDialog(self, title=f'Warning - file not saved', message=f'Save {self.tabText(index)}?')
+            self.dialog.yes.clicked.connect(lambda: self._close_tab(index, save=True))
+            self.dialog.no.clicked.connect(lambda: self._close_tab(index, save=False))
+        else:
+            self._close_tab(index)
+
+    def _close_tab(self, index, save=False):
+        if save:
+            self._save(index)
+
         if self._len() == 2:
             sys.exit(0)
 
@@ -57,7 +74,7 @@ class TabWidget(QTabWidget):
 
     def _handle_tab_changed(self, _):
         if self.currentIndex() == self._len() - 1:
-            tab = WorkSheet()
+            tab = WorkSheet(self)
             Controller(tab)
             self.add(tab, 'new tab')
 
@@ -70,34 +87,32 @@ class TabWidget(QTabWidget):
             self._info()
 
     def _open(self):
-        file, _ = QFileDialog.getOpenFileName(None,
-                                              'Select a transformation file',
-                                              '', 'TextTransformation (*.tt)')
-
-        if file:
-            with open(file) as code:
-                filename = os.path.basename(file).split('.')[-2]
-                tab = WorkSheet()
-                Controller(tab)
-                tab.code.set(code.read())
-                self.add(tab, filename)
-
-    def _save(self):
-        filename, _ = QFileDialog.getSaveFileName(None,
-                                                  'Save the current transformation file',
+        filename, _ = QFileDialog.getOpenFileName(None,
+                                                  'Select a transformation file',
                                                   '', 'TextTransformation (*.tt)')
 
         if filename:
-            with open(filename, 'w+') as file:
-                file.write(self._current().code.get())
+            name = os.path.basename(filename).split('.')[-2]
+            tab = WorkSheet.from_file(filename, master=self)
+            print(tab.isdirty)
+            Controller(tab)
+            self.add(tab, name)
+
+    def _save(self, index=-1):
+        tab = self._current() if index == -1 else self.widget(index)
+        name = tab.save()
+        if name:
+            tab.setTabText(self.indexOf(tab), name)
 
     def _info(self):
         info = "===== WORK IN PROGRESS =====\n" \
                "\n" \
-               "Ctrl + Enter to execute\n" \
+               "shortcuts:\n" \
+               "- Ctrl + Enter to execute\n" \
+               "- Ctrl + S to save\n" \
                "\n" \
                "commands:\n" \
                "- replace \"regex\" with \"replacement\"\n" \
                "- sort\n" \
                "- sort reverse"
-        self._necessaryhandle = Dialog(title='info', message=info)
+        self._necessaryhandle = Dialog(title='Info', message=info)

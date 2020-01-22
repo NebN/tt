@@ -1,15 +1,20 @@
-from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QLabel
+import os
+from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QLabel, QFileDialog
 from PyQt5.QtCore import Qt, pyqtSignal, QMargins
 from PyQt5.QtGui import QFont
 from .TextArea import TextArea
 
 
 class WorkSheet(QWidget):
-
     run = pyqtSignal(str)
+    dirty = pyqtSignal(bool)
+    name = pyqtSignal(str)
 
     def __init__(self, master=None):
         QWidget.__init__(self, master)
+        self._filename = None
+        self._savedtext = None
+        self.isdirty = False
         self.code = TextArea(self)
         self.input = TextArea(self)
         self.output = TextArea(self)
@@ -18,6 +23,9 @@ class WorkSheet(QWidget):
         messagefont = QFont()
         messagefont.setPointSize(9)
         self.message.setFont(messagefont)
+
+        self.code.setMinimumSize(300, 65)
+        self.code.textChanged.connect(self._handle_textchanged)
 
         toplayout = QVBoxLayout(self)
         toplayout.setContentsMargins(QMargins(0, 0, 0, 0))
@@ -34,22 +42,66 @@ class WorkSheet(QWidget):
         hsplitter.addWidget(topwidget)
         hsplitter.addWidget(vsplitter)
         hsplitter.setStretchFactor(0, 1)
-        hsplitter.setStretchFactor(1, 8)
+        hsplitter.setStretchFactor(1, 9)
 
         layout = QVBoxLayout(self)
         layout.addWidget(hsplitter)
 
-        self.code.keyPressed.connect(self._handlepress)
+        self.code.keyPressed.connect(self._handle_press)
+        self.dirty.connect(self._handle_dirty)
 
         self.setLayout(layout)
 
-        self.input.set('some text for testing purposes\n'
-                        'This Is All Capitalized')
-        self.code.set('replace "\w+" with "asd"')
+    @staticmethod
+    def from_file(filename, master=None):
+        with open(filename) as file:
+            code = file.read()
+            ws = WorkSheet(master)
+            ws.code.set(code)
+            ws._savedtext = code
+            ws._filename = filename
+            ws.setdirty(False)
+            return ws
 
-    def _handlepress(self, event):
-        if event.key() == Qt.Key_Return and event.modifiers() == Qt.ControlModifier:
-            self.run.emit(self.code.get())
+    def setdirty(self, dirty):
+        self.isdirty = dirty
+        self.dirty.emit(self.isdirty)
+
+    def setfilename(self, filename):
+        self._filename = filename
+        self.name.emit(os.path.basename(self._filename).split('.')[-2])
+
+    def save(self):
+        if not self._filename:
+            filename, _ = QFileDialog.getSaveFileName(None,
+                                                      'Save the current transformation file',
+                                                      '', 'TextTransformation (*.tt)')
+            if filename:
+                self.setfilename(filename)
+
+        if self._filename and self.isdirty:
+            self.setmessage('saving...')
+            with open(self._filename, 'w+') as file:
+                self._savedtext = self.code.get()
+                file.write(self._savedtext)
+                self.setdirty(False)
+            self.setmessage(f'saved to {self._filename}')
+
+    def _handle_dirty(self, dirty):
+        if dirty:
+            self.code.setStyleSheet('border: 1px solid red;')
+        else:
+            self.code.setStyleSheet('')
+
+    def _handle_textchanged(self):
+        self.setdirty(self._savedtext != self.code.get())
+
+    def _handle_press(self, event):
+        if event.modifiers() == Qt.ControlModifier:
+            if event.key() == Qt.Key_Return:
+                self.run.emit(self.code.get())
+            elif event.key() == Qt.Key_S:
+                self.save()
 
     def setoutput(self, text):
         return self.output.set(text)

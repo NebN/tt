@@ -1,6 +1,4 @@
 def timedelta_to_string(timedelta):
-    threshold = 5
-
     string = str(timedelta)
     hours, minutes, details = string.split(':')
     seconds = details[0:2]

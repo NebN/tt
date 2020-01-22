@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout
+from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QSizePolicy
 from PyQt5.QtCore import QSize, Qt
 from .TabWidget import TabWidget
 
@@ -6,7 +6,7 @@ from .TabWidget import TabWidget
 class MainWindow(QMainWindow):
     def __init__(self, master=None):
         QMainWindow.__init__(self, master)
-        self.setMinimumSize(QSize(1000, 600))
+        self.setMinimumSize(QSize(900, 600))
         self.setWindowTitle('TT - Text Transformations')
 
         widget = QWidget(self)

@@ -29,7 +29,12 @@ class Controller:
                 input = Text(text=self.worksheet.getinput())
                 self.worksheet.setmessage('executing...')
                 t0 = timer()
-                output = transformation.transform(input).text()
+                output = None
+                try:
+                    output = transformation.transform(input).text()
+                except Exception as e:
+                    self.worksheet.setmessage(f'error while transforming: {e}')
+
                 t1 = timer()
                 elapsed = timedelta(seconds=(t1 - t0))
                 # self.worksheet.setmessage(f'transformation took {":".join(str(elapsed).split(":")[-3])}')
