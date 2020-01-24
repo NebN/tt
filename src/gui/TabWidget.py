@@ -94,7 +94,6 @@ class TabWidget(QTabWidget):
         if filename:
             name = os.path.basename(filename).split('.')[-2]
             tab = WorkSheet.from_file(filename, master=self)
-            print(tab.isdirty)
             Controller(tab)
             self.add(tab, name)
 
@@ -113,6 +112,8 @@ class TabWidget(QTabWidget):
                "\n" \
                "commands:\n" \
                "- replace \"regex\" with \"replacement\"\n" \
+               "- grep \"regex\"\n" \
+               "- distinct\n" \
                "- sort\n" \
                "- sort reverse"
         self._necessaryhandle = Dialog(title='Info', message=info)

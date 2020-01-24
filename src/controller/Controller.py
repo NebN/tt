@@ -1,3 +1,4 @@
+import traceback
 from timeit import default_timer as timer
 from datetime import timedelta
 from rply.errors import LexingError
@@ -17,13 +18,16 @@ class Controller:
 
             try:
                 transformation = compile_transformation(code)
-                print(transformation)
             except LexingError as e:
                 self.worksheet.setmessage(f'syntax error at index {e.source_pos.idx}')
             except ValueError as e:
                 self.worksheet.setmessage('syntax error')
+                print(e)
+                print(traceback.format_exc())
             except Exception as e:
                 self.worksheet.setmessage('unknown error')
+                print(e)
+                print(traceback.format_exc())
 
             if transformation:
                 input = Text(text=self.worksheet.getinput())
@@ -37,7 +41,6 @@ class Controller:
 
                 t1 = timer()
                 elapsed = timedelta(seconds=(t1 - t0))
-                # self.worksheet.setmessage(f'transformation took {":".join(str(elapsed).split(":")[-3])}')
                 self.worksheet.setmessage(f'transformed in {(TimeUtils.timedelta_to_string(elapsed))}')
                 self.worksheet.setoutput(output)
 

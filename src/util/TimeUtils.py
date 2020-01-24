@@ -1,6 +1,5 @@
 def timedelta_to_string(timedelta):
-    string = str(timedelta)
-    hours, minutes, details = string.split(':')
+    hours, minutes, details = str(timedelta).split(':')
     seconds = details[0:2]
     millis = details[3:6]
     micros = details[6:]

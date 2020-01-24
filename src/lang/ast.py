@@ -1,58 +1,76 @@
 import re
-from abc import abstractmethod
-from src.model import Text
+from decimal import Decimal
 
 
 class String:
     def __init__(self, value):
-        self._value = re.match('"(.*)"', value).group(1)
+        self._value = re.match('"(.*)"', value, flags=re.MULTILINE).group(1)
 
     def value(self):
         return self._value
 
 
-class Transformation:
-    @abstractmethod
-    def transform(self, text):
-        pass
+class Number:
+    def __init__(self, string=None, value=None):
+        assert (string is not None or value is not None)
+        if value is not None:
+            self._value = value
+        else:
+            possible_separators = [',', '.']
+            last_symbol = next((c for c in string[::-1] if c in possible_separators), None)
 
+            is_separator = False
+            cleaned = string
 
-class Replace(Transformation):
-    def __init__(self, original, replacement):
-        self.original = original.value()
-        self.replacement = replacement.value()
+            if last_symbol is not None:
+                is_separator = string.count(last_symbol) == 1
+                if is_separator:
+                    possible_separators.remove(last_symbol)
+                for s in possible_separators:
+                    cleaned = cleaned.replace(s, '', -1)
+                cleaned = cleaned.replace(last_symbol, '.')
 
-    def transform(self, inputtext):
-        print(self)
-        return Text(text=re.sub(self.original, self.replacement, inputtext.text()))
+            if is_separator:
+                self._value = Decimal(cleaned)
+            else:
+                self._value = int(cleaned)
 
-    def __repr__(self):
-        return f'Replace {self.original} with {self.replacement}'
+    def value(self):
+        return self._value
 
+    def add(self, other):
+        return Number(value=self.value() + other.value())
 
-class Sort(Transformation):
-    def __init__(self, reverse):
-        self.reverse = reverse
+    def sub(self, other):
+        return Number(value=self.value() - other.value())
 
-    def transform(self, text):
-        lines = text.lines()
-        lines.sort(reverse=self.reverse)
-        return Text(lines=lines)
+    def times(self, other):
+        return Number(value=self.value() * other.value())
 
-    def __repr__(self):
-        return f'Sort reverse={self.reverse}'
-
-
-class MultiTransformation(Transformation):
-    def __init__(self, *transformations):
-        self.transformations = transformations
-
-    def transform(self, text):
-        transformed = text
-        for t in self.transformations:
-            transformed = t.transform(transformed)
-        return transformed
+    def divide(self, other):
+        return Number(value=self.value() / other.value())
 
     def __repr__(self):
-        return "\n".join([str(t) for t in self.transformations])
+        if isinstance(self._value, int):
+            return str(self._value)
+        else:
+            return '{:f}'.format(self._value)
 
+
+class Flags:
+    def __init__(self, value):
+        chars = re.match('-(\w*)', value).group(1) if value else ''
+        self._flags = [char for char in chars]
+
+    def exists(self, flag):
+        return flag in self._flags
+
+    def all(self):
+        return self._flags
+
+    @classmethod
+    def empty(cls):
+        return Flags('-')
+
+    def __repr__(self):
+        return ",".join(self._flags)
