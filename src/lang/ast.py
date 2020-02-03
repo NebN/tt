@@ -1,10 +1,11 @@
 import re
+import ast
 from decimal import Decimal
 
 
 class String:
     def __init__(self, value):
-        self._value = re.match('"(.*)"', value, flags=re.MULTILINE).group(1)
+        self._value = ast.literal_eval(value)
 
     def value(self):
         return self._value
