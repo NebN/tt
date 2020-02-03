@@ -59,7 +59,7 @@ class Grep(Transformation):
         lines = text.lines()
 
         exact = self.flags.exists('o')
-        invert = self.flags.exists('v')
+        invert = self.flags.exists('v',)
 
         match = regex.match if exact else regex.search
 

@@ -1,13 +1,16 @@
 import os
-import sys
-from PyQt5.QtWidgets import QTabWidget, QToolButton, QMenu, QWidget, QFileDialog, QTabBar
+
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QTabWidget, QToolButton, QMenu, QWidget, QFileDialog, QTabBar, QMessageBox
+
 from src.controller import Controller, UserAction
-from .WorkSheet import WorkSheet
 from .Dialog import Dialog
-from .BinaryDialog import BinaryDialog
+from .WorkSheet import WorkSheet
 
 
 class TabWidget(QTabWidget):
+    emptied = pyqtSignal(int)
+
     def __init__(self, master=None):
         QTabWidget.__init__(self, master)
         self.setTabsClosable(True)
@@ -22,7 +25,7 @@ class TabWidget(QTabWidget):
         # Initial Tab
         tab = WorkSheet()
         Controller(tab)
-        self.add(tab, 'new tab')
+        self.add(tab)
 
         # Menu
         self.menu = QToolButton(self)
@@ -36,17 +39,37 @@ class TabWidget(QTabWidget):
         self.menu.triggered.connect(self._handle_menu_action)
         self.setCornerWidget(self.menu)
 
+    def safeclose(self):
+        for sheet in self._sheets():
+            closed = self._handle_close_requested(self.indexOf(sheet))
+            if not closed:
+                return False
+        return True
+
+    def add(self, tab, name=None):
+        if not name:
+            new_tab_count = len(list(filter(
+                lambda t: t.startswith('new tab'),
+                [self.tabText(i) for i in range(0, self._len() - 1)]
+            )))
+            if new_tab_count == 0:
+                name = 'new tab'
+            else:
+                name = f'new tab ({new_tab_count + 1})'
+
+        index = self._len() - 1
+        tab.name.connect(self._handle_name_change)
+        self.insertTab(index, tab, name)
+        self.setCurrentIndex(index)
+
+    def _sheets(self):
+        return [self.widget(n) for n in range(0, self._len() - 1)]
+
     def _len(self):
         return len(self)
 
     def _current(self):
         return self.currentWidget()
-
-    def add(self, tab, name):
-        index = self._len() - 1
-        tab.name.connect(self._handle_name_change)
-        self.insertTab(index, tab, name)
-        self.setCurrentIndex(index)
 
     def _handle_name_change(self, name):
         # TODO can this be wrong? cab the tab change in the meanwhile?
@@ -55,34 +78,48 @@ class TabWidget(QTabWidget):
     def _handle_close_requested(self, index):
         tab = self.widget(index)
         if tab.isdirty:
-            self.dialog = BinaryDialog(self, title=f'Warning - file not saved', message=f'Save {self.tabText(index)}?')
-            self.dialog.yes.clicked.connect(lambda: self._close_tab(index, save=True))
-            self.dialog.no.clicked.connect(lambda: self._close_tab(index, save=False))
+            close = QMessageBox.question(self,
+                                         'Warning - file not saved',
+                                         f'Save {self.tabText(index)}?',
+                                         QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+            if close == QMessageBox.Yes:
+                return self._close_tab(index, save=True)
+            elif close == QMessageBox.No:
+                return self._close_tab(index, save=False)
+            else:
+                return False
         else:
-            self._close_tab(index)
+            return self._close_tab(index)
 
     def _close_tab(self, index, save=False):
+        close = True
+
         if save:
-            self._save(index)
+            close = self._save(index=index)
 
-        if self._len() == 2:
-            sys.exit(0)
+        if close:
+            if self._len() == 2:
+                self.emptied.emit(0)
 
-        if index == self._len() - 2:
-            self.setCurrentIndex(index - 1)
-        self.removeTab(index)
+            if index == self._len() - 2:
+                self.setCurrentIndex(index - 1)
+            self.removeTab(index)
+
+        return close
 
     def _handle_tab_changed(self, _):
         if self.currentIndex() == self._len() - 1:
             tab = WorkSheet(self)
             Controller(tab)
-            self.add(tab, 'new tab')
+            self.add(tab)
 
     def _handle_menu_action(self, event):
         if event.text() == UserAction.OPEN.label:
             self._open()
         elif event.text() == UserAction.SAVE.label:
-            self._save()
+            self._save(overwrite=True)
+        elif event.text() == UserAction.SAVE_AS.label:
+            self._save(overwrite=False)
         elif event.text() == UserAction.INFO.label:
             self._info()
 
@@ -97,11 +134,12 @@ class TabWidget(QTabWidget):
             Controller(tab)
             self.add(tab, name)
 
-    def _save(self, index=-1):
+    def _save(self, overwrite=True, index=-1):
         tab = self._current() if index == -1 else self.widget(index)
-        name = tab.save()
+        name = tab.save(overwrite)
         if name:
             tab.setTabText(self.indexOf(tab), name)
+        return name is not None
 
     def _info(self):
         info = "===== WORK IN PROGRESS =====\n" \

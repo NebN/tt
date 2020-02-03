@@ -15,5 +15,14 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         layout.setAlignment(Qt.AlignCenter)
 
-        tabs = TabWidget()
-        layout.addWidget(tabs)
+        self.tabs = TabWidget(self)
+        self.tabs.emptied.connect(lambda x: self.close())
+        layout.addWidget(self.tabs)
+
+    def closeEvent(self, event):
+        if self.tabs.safeclose():
+            print('got true, closing')
+            event.accept()
+        else:
+            print('got false, not closing')
+            event.ignore()

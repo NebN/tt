@@ -7,9 +7,9 @@ def timedelta_to_string(timedelta):
     if int(hours) > 0:
         return f'{hours}:{minutes}.{seconds}'
     if int(minutes) > 0:
-        return f'{minutes}.{seconds} minutes'
+        return f'{int(minutes)} minutes and {int(seconds)} seconds'
     if int(seconds) > 0:
-        return f'{int(seconds)},{millis} seconds'
+        return f'{int(seconds)} seconds and {int(millis)} milliseconds'
     if int(millis) > 0:
-        return f'{int(millis)},{micros} milliseconds'
+        return f'{int(millis)} milliseconds'
     return f'{int(micros)} microseconds'

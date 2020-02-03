@@ -71,8 +71,8 @@ class WorkSheet(QWidget):
         self._filename = filename
         self.name.emit(os.path.basename(self._filename).split('.')[-2])
 
-    def save(self):
-        if not self._filename:
+    def save(self, overwrite):
+        if not self._filename or not overwrite:
             filename, _ = QFileDialog.getSaveFileName(None,
                                                       'Save the current transformation file',
                                                       '', 'TextTransformation (*.tt)')
@@ -97,11 +97,17 @@ class WorkSheet(QWidget):
         self.setdirty(self._savedtext != self.code.get())
 
     def _handle_press(self, event):
+        print("======================")
+        print(event.modifiers() == Qt.ShiftModifier + Qt.ControlModifier)
+        print(event.modifiers() == Qt.ControlModifier)
+        print(event.modifiers() == Qt.AltModifier)
+        print(event.modifiers() == Qt.MetaModifier)
+
         if event.modifiers() == Qt.ControlModifier:
             if event.key() == Qt.Key_Return:
                 self.run.emit(self.code.get())
             elif event.key() == Qt.Key_S:
-                self.save()
+                self.save(overwrite=event.modifiers != Qt.ShiftModifier)
 
     def setoutput(self, text):
         return self.output.set(text)

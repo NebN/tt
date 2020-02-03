@@ -7,7 +7,7 @@ class Lexer:
 
     def get_lexer(self):
         # elements
-        self.lexer.add('STRING', '".*?"')
+        self.lexer.add('STRING', '(?<!\\\)".*?(?<!\\\)"')
         self.lexer.add('NUMBER', '[\d\.\,]+')
         self.lexer.add('FLAGS', '-[a-zA-Z]+')
 
