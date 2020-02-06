@@ -23,9 +23,9 @@ class TabWidget(QTabWidget):
         self.currentChanged.connect(self._handle_tab_changed)
 
         # Initial Tab
-        tab = WorkSheet()
-        Controller(tab)
-        self.add(tab)
+        self.tab = WorkSheet()
+        Controller(self.tab)
+        self.add(self.tab)
 
         # Menu
         self.menu = QToolButton(self)

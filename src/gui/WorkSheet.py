@@ -2,7 +2,7 @@ import os
 from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QLabel, QFileDialog
 from PyQt5.QtCore import Qt, pyqtSignal, QMargins
 from PyQt5.QtGui import QFont
-from .TextArea import TextArea
+from gui.text import TextArea, SyntaxHighlighter
 
 
 class WorkSheet(QWidget):
@@ -15,7 +15,8 @@ class WorkSheet(QWidget):
         self._filename = None
         self._savedtext = None
         self.isdirty = False
-        self.code = TextArea(self)
+        self.code = TextArea(self, pointsize=10)
+        self.highlighter = SyntaxHighlighter(self.code)
         self.input = TextArea(self)
         self.output = TextArea(self)
         self.output.setReadOnly(True)
@@ -97,12 +98,6 @@ class WorkSheet(QWidget):
         self.setdirty(self._savedtext != self.code.get())
 
     def _handle_press(self, event):
-        print("======================")
-        print(event.modifiers() == Qt.ShiftModifier + Qt.ControlModifier)
-        print(event.modifiers() == Qt.ControlModifier)
-        print(event.modifiers() == Qt.AltModifier)
-        print(event.modifiers() == Qt.MetaModifier)
-
         if event.modifiers() == Qt.ControlModifier:
             if event.key() == Qt.Key_Return:
                 self.run.emit(self.code.get())

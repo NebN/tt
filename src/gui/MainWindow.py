@@ -21,8 +21,6 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         if self.tabs.safeclose():
-            print('got true, closing')
             event.accept()
         else:
-            print('got false, not closing')
             event.ignore()

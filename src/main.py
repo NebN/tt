@@ -6,6 +6,9 @@ from src.gui import MainWindow
 
 app = QApplication(sys.argv)
 
+with open('../res/css/style.css') as stylesheet:
+    app.setStyleSheet(stylesheet.read())
+
 if QT_VERSION >= 0x50501:
     def excepthook(type_, value, traceback_):
         traceback.print_exception(type_, value, traceback_)

@@ -1,13 +1,17 @@
 from PyQt5.QtWidgets import QPlainTextEdit
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QFont
 
 
 class TextArea(QPlainTextEdit):
 
     keyPressed = pyqtSignal('QKeyEvent')
 
-    def __init__(self, master):
+    def __init__(self, master, pointsize=8):
         QPlainTextEdit.__init__(self, master)
+        font = QFont()
+        font.setPointSize(pointsize)
+        self.setFont(font)
         self.setLineWrapMode(False)
 
     # Override
