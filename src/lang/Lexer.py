@@ -1,4 +1,5 @@
 from rply import LexerGenerator
+from .patterns import *
 
 
 class Lexer:
@@ -7,30 +8,30 @@ class Lexer:
 
     def get_lexer(self):
         # elements
-        self.lexer.add('STRING', r'''"[^"\\]*(\\.[^"\\]*)*"''')
-        self.lexer.add('NUMBER', '[\d\.\,]+')
-        self.lexer.add('FLAGS', '-[a-zA-Z]+')
+        self.lexer.add('STRING', STRING)
+        self.lexer.add('NUMBER', NUMBER)
+        self.lexer.add('FLAGS', FLAGS)
 
         # transformations
-        self.lexer.add('REPLACE', 'replace')
-        self.lexer.add('WITH', 'with')
-        self.lexer.add('SORT', 'sort')
-        self.lexer.add('DISTINCT', 'distinct')
-        self.lexer.add('GREP', 'grep')
-        self.lexer.add('JOIN', 'join')
-        self.lexer.add('SPLIT', 'split')
+        self.lexer.add('REPLACE', REPLACE)
+        self.lexer.add('WITH', WITH)
+        self.lexer.add('SORT', SORT)
+        self.lexer.add('DISTINCT', DISTINCT)
+        self.lexer.add('GREP', GREP)
+        self.lexer.add('JOIN', JOIN)
+        self.lexer.add('SPLIT', SPLIT)
 
         # operations
-        self.lexer.add('ADD', '\+')
-        self.lexer.add('SUB', '-')
-        self.lexer.add('TIMES', '\*')
-        self.lexer.add('DIVIDE', '/')
+        self.lexer.add('ADD', ADD)
+        self.lexer.add('SUB', SUB)
+        self.lexer.add('TIMES', TIMES)
+        self.lexer.add('DIVIDE', DIVIDE)
 
-        self.lexer.add('AS', 'as')
+        self.lexer.add('AS', AS)
 
         # ignore
         self.lexer.ignore('\s+')
-        self.lexer.ignore('\s*//.*')  # comments start with '//'
-        self.lexer.ignore('\s*--.*')  # or '--'
+        self.lexer.ignore(SLASH_COMMENT)
+        self.lexer.ignore(DASH_COMMENT)
 
         return self.lexer.build()

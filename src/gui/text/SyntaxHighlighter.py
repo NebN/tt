@@ -1,5 +1,6 @@
 from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont, QColor
 from PyQt5.QtCore import Qt, QRegExp
+from lang import patterns
 
 
 class SyntaxHighlighter(QSyntaxHighlighter):
@@ -17,22 +18,20 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         comment_color.setAlpha(80)
         comment_format.setForeground(comment_color)
 
-        keywords = ['replace', 'with', 'sort', 'grep', 'distinct', 'join', 'split']
-
         self.rules = []
 
         # strings
-        self.rules.append((r'''"[^"\\]*(\\.[^"\\]*)*"''', string_format))
+        self.rules.append((patterns.STRING, string_format))
 
         # comments
-        self.rules.append((r'''--[^\n]*''', comment_format))
-        self.rules.append((r'''//[^\n]*''', comment_format))
+        self.rules.append((patterns.SLASH_COMMENT, comment_format))
+        self.rules.append((patterns.DASH_COMMENT, comment_format))
 
         # flags
-        self.rules.append((r'-\w+', flags_format))
+        self.rules.append((patterns.FLAGS, flags_format))
 
         # keywords
-        for word in keywords:
+        for word in patterns.KEYWORDS:
             regex = QRegExp(fr'\b{word}\b')
             self.rules.append((regex, keyword_format))
 
