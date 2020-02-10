@@ -274,8 +274,9 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
       background: none;
 }
 
-QTextEdit
+TextArea
 {
+    font-family: "Lucida Console", Monaco, monospace;
     background-color: #242424;
 }
 
