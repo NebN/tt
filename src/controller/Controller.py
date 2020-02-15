@@ -20,6 +20,8 @@ class Controller:
                 transformation = compile_transformation(code)
             except LexingError as e:
                 self.worksheet.setmessage(f'syntax error at index {e.source_pos.idx}')
+                print(e)
+                print(traceback.format_exc())
             except ValueError as e:
                 self.worksheet.setmessage('syntax error')
                 print(e)

@@ -1,5 +1,6 @@
 import re
 import ast
+import enum
 from decimal import Decimal
 
 
@@ -9,6 +10,9 @@ class String:
 
     def value(self):
         return self._value
+
+    def __repr__(self):
+        return self.value()
 
 
 class Number:
@@ -69,9 +73,40 @@ class Flags:
     def all(self):
         return self._flags
 
+    def isempty(self):
+        return not self._flags
+
     @classmethod
     def empty(cls):
         return Flags('-')
 
     def __repr__(self):
         return ",".join(self._flags)
+
+
+class InputType(enum.Enum):
+    XML = 'XML'
+    JSOpN = 'JSON'
+
+    def __init__(self, label):
+        self.label = label
+
+    def __repr__(self):
+        return self.label
+
+
+class Indices:
+    def __init__(self, string):
+        self.indices = []
+        for section in string.strip()[1:-1].split(','):
+            section_split = section.split('-')
+            for ix in range(int(section_split[0]), int(section_split[-1]) + 1):
+                self.indices.append(ix)
+
+        self.indices.sort()
+
+    def __iter__(self):
+        return iter(self.indices)
+
+    def __repr__(self):
+        return ', '.join([str(i) for i in self.indices])
