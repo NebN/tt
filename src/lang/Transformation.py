@@ -18,7 +18,7 @@ class Transformation:
 class Replace(Transformation):
     def __init__(self, original, replacement):
         self.original = original.value()
-        self.replacement = replacement.value()
+        self.replacement = re.sub(r'(?<!\\)\$(\d+)', r'\\\1', replacement.value())
 
     def transform(self, inputtext):
         return Text(text=re.sub(self.original, self.replacement, inputtext.text()))
