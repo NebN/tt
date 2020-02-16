@@ -1,4 +1,3 @@
-import os
 from enum import Enum
 
 
@@ -71,9 +70,9 @@ class Pattern(Enum):
             cls.UPPER,
             # cls.WHEN,
             cls.FORMAT,
-            cls.CUT,
             cls.KEEP,
             cls.REMOVE,
+            cls.CUT,
             cls.APPEND,
             cls.PREPEND
         ]]

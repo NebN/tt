@@ -162,8 +162,9 @@ class GroupsTransformation(Transformation):
                 transformed = line
                 search = self.pattern.search(line)
                 if search:
-                    for group in search.groups():
-                        transformed = transformed.replace(group, self.transformation(group))
+                    for ix in range(1, len(search.groups()) + 1):
+                        s, e = search.span(ix)
+                        transformed = transformed[:s] + self.transformation(transformed[s:e]) + transformed[e:]
                 return transformed
 
             return f
@@ -182,15 +183,11 @@ class GroupsTransformation(Transformation):
             return f
 
     def transform(self, text):
-        transformed_lines = []
         function = self._transform_line_function()
-        for line in text.lines():
-            transformed_lines.append(function(line))
-
-        return Text(lines=transformed_lines)
+        return Text(lines=[function(line) for line in text.lines()])
 
     def __repr__(self):
-        return f'GroupsTransformation {self.transformation} {self.pattern}'
+        return f'GroupsTransformation {self.transformation.__name__} {self.pattern}'
 
 
 class Format(Transformation):

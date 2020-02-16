@@ -1,0 +1,5 @@
+join
+join "string"
+
+Joins all the lines in a single line, combining them with the string provided.
+The string argument is optional, the default is ",".

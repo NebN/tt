@@ -1,0 +1,7 @@
+grep "regex"
+
+Keeps only the lines that match the given regex.
+
+- v inverted
+- o exact match on the entire line
+- i case insensitive

@@ -86,7 +86,7 @@ class Flags:
 
 class InputType(enum.Enum):
     XML = 'XML'
-    JSOpN = 'JSON'
+    JSON = 'JSON'
 
     def __init__(self, label):
         self.label = label

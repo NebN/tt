@@ -1,0 +1,3 @@
+distinct
+
+Removes duplicate lines, keeps the first which it encounters.

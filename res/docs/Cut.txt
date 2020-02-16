@@ -1,0 +1,12 @@
+cut "string" keep [range]
+
+Splits each line into columns based on the string provided and keeps the ones specified by the [range].
+
+To express the range provide the extremes between square parentheses,
+commas separate numbers, dashes express a range between the first and the second number.
+Some examples:
+
+[0] (0)
+[0,3] (0,3)
+[0-3] (0,1,2,3)
+[0-3, 5, 7-9] (0,1,2,3,5,7,8,9)

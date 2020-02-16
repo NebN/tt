@@ -1,0 +1,4 @@
+lower "regex"
+
+Transforms to lowercase all the text that matches the regex provided if no capture groups are present.
+If capture groups are present transforms only the text inside the groups.

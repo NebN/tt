@@ -1,0 +1,5 @@
+prepend "string"
+
+Prepend the given text to the end of the output.
+
+- l prepends the text to each line

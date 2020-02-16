@@ -27,7 +27,6 @@ class WorkSheet(QWidget):
         self.message.setFont(messagefont)
 
         self.code.setMinimumSize(300, 65)
-        self.code.set('sort')
         self.code.textChanged.connect(self._handle_code_textchanged)
         self.input.textChanged.connect(self._handle_input_textchanged)
 

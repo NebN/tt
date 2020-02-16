@@ -1,0 +1,5 @@
+sort
+
+Sorts the lines lexicographically.
+
+- r reversed order

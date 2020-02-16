@@ -1,0 +1,3 @@
+replace "regex" with "replacement"
+
+Replaces all the matches of the given regex with the replacement provided.

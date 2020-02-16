@@ -1,0 +1,5 @@
+append "string"
+
+Appends the given text to the beginning of the output.
+
+- l appends the text to each line

@@ -2,10 +2,9 @@ import os
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QTabWidget, QToolButton, QMenu, QWidget, QFileDialog, QTabBar, QMessageBox
-
 from src.controller import Controller, UserAction
-from .Dialog import Dialog
 from .WorkSheet import WorkSheet
+from .Documentation import Documentation
 
 
 class TabWidget(QTabWidget):
@@ -142,16 +141,4 @@ class TabWidget(QTabWidget):
         return name is not None
 
     def _info(self):
-        info = "===== WORK IN PROGRESS =====\n" \
-               "\n" \
-               "shortcuts:\n" \
-               "- Ctrl + Enter to execute\n" \
-               "- Ctrl + S to save\n" \
-               "\n" \
-               "commands:\n" \
-               "- replace \"regex\" with \"replacement\"\n" \
-               "- grep \"regex\"\n" \
-               "- distinct\n" \
-               "- sort\n" \
-               "- sort reverse"
-        self._necessaryhandle = Dialog(title='Info', message=info)
+        self._necessaryhandle = Documentation(self)

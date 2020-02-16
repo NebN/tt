@@ -1,0 +1,6 @@
+strip
+
+Strips leading and trailing whitespaces as well as empty lines.
+
+- v vertical, remove only empty lines
+- h horizontal, remove only leading and trailing whitespaces

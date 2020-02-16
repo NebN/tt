@@ -1,0 +1,4 @@
+format JSON
+format XML
+
+formats the input text, currently supported formats are JSON and XML.
