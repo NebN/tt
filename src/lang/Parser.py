@@ -119,9 +119,18 @@ class Parser:
             else:
                 return Operation(pattern=pattern, operator=Divide(amount))
 
-        @self.pg.production('transformation : transformation NEWLINE transformation')
+        @self.pg.production('transformation : transformation newlines transformation')
         def multi(p):
             return MultiTransformation(p[0], p[2])
+
+        @self.pg.production('newlines : NEWLINE')
+        @self.pg.production('newlines : newlines NEWLINE')
+        def newlines(p):
+            return p[0]
+
+        @self.pg.production('transformation : transformation newlines')
+        def end(p):
+            return p[0]
 
         @self.pg.production('string : STRING')
         def string(p):
@@ -148,7 +157,10 @@ class Parser:
         @self.pg.error
         def error_handle(token):
             print(f'unexpected {token.gettokentype()} token ({token.getstr()})')
-            raise ValueError(token)
+            if token.gettokentype() == '$end':
+                raise ValueError('unexpected end of statement')
+            else:
+                raise ValueError(f'unexpected {token.getstr()}')
 
     def get_parser(self):
         return self.pg.build()

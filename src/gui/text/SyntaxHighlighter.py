@@ -1,11 +1,13 @@
-from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont, QColor
+from PyQt5.QtGui import QTextBlockFormat, QTextCursor, QSyntaxHighlighter, QTextCharFormat, QFont, QColor
 from PyQt5.QtCore import QRegExp
 from lang import Pattern
+from src.gui import Color
 
 
 class SyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, editor):
         QSyntaxHighlighter.__init__(self, editor.document())
+        self.editor = editor
         self.base_format = self.format(0)
         keyword_format = QTextCharFormat()
         keyword_format.setForeground(QColor('#FDFEFE'))
@@ -24,6 +26,10 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         comment_color = QColor('#FDF2E9')
         comment_color.setAlpha(80)
         comment_format.setForeground(comment_color)
+
+        self.error_format = QTextCharFormat()
+        self.error_format.setForeground(Color.RED)
+        self.error_format.setFontUnderline(True)
 
         self.rules = []
 
@@ -57,3 +63,11 @@ class SyntaxHighlighter(QSyntaxHighlighter):
                 index = expression.indexIn(text, index + length)
 
         self.setCurrentBlockState(0)
+
+    def error(self, ix, length):
+        cursor = self.editor.textCursor()
+        cursor.setPosition(ix, QTextCursor.MoveAnchor)
+        cursor.movePosition(QTextCursor.Right,
+                            QTextCursor.KeepAnchor,
+                            length)
+        cursor.setCharFormat(self.error_format)

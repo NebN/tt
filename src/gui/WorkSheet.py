@@ -2,6 +2,7 @@ import os
 from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QLabel, QFileDialog
 from PyQt5.QtCore import Qt, pyqtSignal, QMargins
 from PyQt5.QtGui import QFont
+from gui import Color
 from gui.text import TextArea, SyntaxHighlighter
 
 
@@ -26,13 +27,15 @@ class WorkSheet(QWidget):
         self.message.setFont(messagefont)
 
         self.code.setMinimumSize(300, 65)
-        self.code.textChanged.connect(self._handle_textchanged)
+        self.code.set('sort')
+        self.code.textChanged.connect(self._handle_code_textchanged)
+        self.input.textChanged.connect(self._handle_input_textchanged)
 
         toplayout = QVBoxLayout(self)
         toplayout.setContentsMargins(QMargins(0, 0, 0, 0))
         toplayout.addWidget(self.message, alignment=Qt.AlignCenter)
         toplayout.addWidget(self.code)
-        topwidget = QWidget()
+        topwidget = QWidget(self)
         topwidget.setLayout(toplayout)
 
         vsplitter = QSplitter(Qt.Horizontal)
@@ -49,9 +52,12 @@ class WorkSheet(QWidget):
         layout.addWidget(hsplitter)
 
         self.code.keyPressed.connect(self._handle_press)
+        self.input.keyPressed.connect(self._handle_press)
         self.dirty.connect(self._handle_dirty)
 
         self.setLayout(layout)
+
+        self.last_execution_code = ''
 
     @staticmethod
     def from_file(filename, master=None):
@@ -87,15 +93,24 @@ class WorkSheet(QWidget):
                 file.write(self._savedtext)
                 self.setdirty(False)
             self.setmessage(f'saved to {self._filename}')
+            self.code.flash(Color.BLUE)
 
     def _handle_dirty(self, dirty):
         if dirty:
-            self.code.setStyleSheet('border: 1px solid red;')
+            self.code.setbordercolor(Color.BLACK)
         else:
-            self.code.setStyleSheet('')
+            self.code.setbordercolor(Color.DARK_BLUE)
 
-    def _handle_textchanged(self):
-        self.setdirty(self._savedtext != self.code.get())
+    def _handle_code_textchanged(self):
+        current_code = self.code.get()
+        self.setdirty(current_code != self._savedtext)
+        # For some reason pressing modifiers like CTRL or SHIFT triggers textChanged
+        # so this check is necessary
+        if current_code != self.last_execution_code:
+            self.output.setbordercolor(Color.BLACK)
+
+    def _handle_input_textchanged(self):
+        self.output.setbordercolor(Color.BLACK)
 
     def _handle_press(self, event):
         if event.modifiers() == Qt.ControlModifier:

@@ -14,6 +14,6 @@ class Lexer:
                 self.lexer.ignore(pattern.pattern)
 
         # ignore whitespace
-        self.lexer.ignore('[ \t\r\f\v]+')
+        self.lexer.ignore(r'[ \t\r\f\v]+')
 
         return self.lexer.build()

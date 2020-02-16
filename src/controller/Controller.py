@@ -5,6 +5,7 @@ from rply.errors import LexingError
 from src.lang import compile_transformation
 from src.model import Text
 from src.util import TimeUtils
+from src.gui import Color
 
 
 class Controller:
@@ -15,17 +16,22 @@ class Controller:
         # declaring this outside __init__ does not work, why?
         def _handleexecute(code):
             transformation = None
-
             try:
                 transformation = compile_transformation(code)
+                self.worksheet.last_execution_code = self.worksheet.code.get()
             except LexingError as e:
-                self.worksheet.setmessage(f'syntax error at index {e.source_pos.idx}')
+                ix = e.source_pos.idx
+                worksheet.code.flash(Color.RED)
+                text = worksheet.code.document().findBlock(ix).text()
+                self.worksheet.setmessage(f'syntax error: {text}')
+                self.worksheet.highlighter.error(ix, len(text))
                 print(e)
-                print(traceback.format_exc())
+                # print(traceback.format_exc())
             except ValueError as e:
-                self.worksheet.setmessage('syntax error')
+                worksheet.code.flash(Color.RED)
+                self.worksheet.setmessage(f'syntax error: {e}')
                 print(e)
-                print(traceback.format_exc())
+                # print(traceback.format_exc())
             except Exception as e:
                 self.worksheet.setmessage('unknown error')
                 print(e)
@@ -44,6 +50,7 @@ class Controller:
                 t1 = timer()
                 elapsed = timedelta(seconds=(t1 - t0))
                 self.worksheet.setmessage(f'transformed in {(TimeUtils.timedelta_to_string(elapsed))}')
+                self.worksheet.output.flash(Color.GREEN, end=Color.DARK_GREEN)
                 self.worksheet.setoutput(output)
 
         self.worksheet.run.connect(_handleexecute)
